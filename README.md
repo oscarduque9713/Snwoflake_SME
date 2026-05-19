@@ -59,7 +59,9 @@ Gold Layer
    |
    v
 Batch Control / Audit Table
+```
 
+```
 snowflake-data-pipeline/
 │
 ├── README.md
@@ -83,3 +85,59 @@ snowflake-data-pipeline/
 │
 └── sample_data/
     └── README.md
+```
+
+## Pipeline Flow
+1. Environment Preparation
+
+Creates the required Snowflake objects such as databases, schemas, stages, file formats, and tables.
+
+2. Batch Initialization
+
+Creates a new batch record to track the pipeline execution.
+
+Each run receives a unique batch identifier that is used to monitor row counts, status, and execution metadata.
+
+3. File Upload
+
+Uploads local files into a Snowflake internal stage.
+
+Files can be organized by batch, source system, file type, or business domain.
+
+4. Raw Data Ingestion
+
+Loads staged files into raw tables.
+
+The ingestion layer stores the original content and technical metadata such as:
+
+File name
+File row number
+Load timestamp
+Batch identifier
+5. Batch Metrics Update
+
+Updates the batch control table with row counts and processing metrics.
+
+Typical metrics include:
+
+Number of CSV rows loaded
+Number of JSON rows loaded
+Number of XML or TXT rows loaded
+Total rows loaded
+6. Load Validation
+
+Validates that the current batch loaded data successfully.
+
+If the batch does not contain valid records, the process can be stopped before running downstream transformations.
+
+7. Data Transformation
+
+Applies transformation logic to convert raw data into structured and curated datasets.
+
+8. Business Rules
+
+Applies business logic, enrichment rules, mappings, or derived calculations.
+
+9. Gold Layer Load
+
+Loads the final curated and enriched data into the Gold layer for reporting, analytics, or downstream consumption.
