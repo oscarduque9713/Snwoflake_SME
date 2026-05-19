@@ -1,0 +1,125 @@
+
+/*## Referential Consistency Rules
+
+After building the canonical transaction view, I apply MERGE statements to ensure that every foreign key referenced by the transaction fact exists in the corresponding dimension.
+
+When a referenced customer, product, order, or payment does not exist in the dimension, a default or inferred record is inserted. This prevents orphan records in the fact table and keeps the canonical model queryable without losing transactional data.*/
+
+-----  Dim Customers
+
+MERGE INTO PROJECT_SEMESTRUCTURED.SILVER.DIM_CUSTOMERS AS TGT
+USING (
+    -- Statisc rows by dimension
+    SELECT 'UNKNOWN' AS CUSTOMER_ID, 
+           'UNKNOWN' AS CUSTOMER_NAME,
+           'UNKNOWN' AS EMAIL,
+           'UNKNOWN' AS SEGMENT,
+           'UNKNOWN' AS LOYALTY_TIER,
+           'UNKNOWN' AS SIGNUP_SOURCE,
+           'UNKNOWN' AS IS_ACTIVE
+    UNION ALL
+    -- real customers don't match
+    SELECT DISTINCT 
+        F.CUSTOMER_ID, 
+        F.CUSTOMER_NAME,
+        'UNKNOWN' AS EMAIL,
+        'UNKNOWN' AS SEGMENT,
+        'UNKNOWN' AS LOYALTY_TIER,
+        'UNKNOWN' AS SIGNUP_SOURCE,
+        'UNKNOWN' AS IS_ACTIVE
+    FROM PROJECT_SEMESTRUCTURED.SILVER.SLV_TRANSACTIONS F
+    WHERE F.CUSTOMER_ID <> 'UNKNOWN'
+) AS SRC
+ON TGT.CUSTOMER_ID = SRC.CUSTOMER_ID
+WHEN NOT MATCHED THEN
+    INSERT (CUSTOMER_ID, CUSTOMER_NAME, EMAIL, SEGMENT, LOYALTY_TIER, SIGNUP_SOURCE, IS_ACTIVE)
+    VALUES (SRC.CUSTOMER_ID, SRC.CUSTOMER_NAME, SRC.EMAIL, SRC.SEGMENT, SRC.LOYALTY_TIER, SRC.SIGNUP_SOURCE, SRC.IS_ACTIVE);
+
+-----  Dim Products
+
+MERGE INTO PROJECT_SEMESTRUCTURED.SILVER.DIM_PRODUCT AS TGT
+USING (
+    -- Statisc rows by dimension
+    SELECT 'UNKNOWN' AS SKU, 
+           'UNKNOWN' AS PRODUCT_NAME,
+           'UNKNOWN' AS CATEGORY,
+           0 AS UNIT_PRICE,
+           'UNKNOWN' AS CURRENCY,
+           'UNKNOWN' AS IS_ACTIVE
+    UNION ALL
+    -- real customers don't match
+    SELECT DISTINCT 
+        F.SKU, 
+        F.DESCRIPTION AS PRODUCT_NAME,
+        'UNKNOWN' AS CATEGORY,
+        NULL AS UNIT_PRICE,  
+        'UNKNOWN' AS CURRENCY,
+        'UNKNOWN' AS IS_ACTIVE
+    FROM PROJECT_SEMESTRUCTURED.SILVER.SLV_TRANSACTIONS F
+    WHERE F.SKU <> 'UNKNOWN'
+) AS SRC
+ON TGT.SKU = SRC.SKU
+WHEN NOT MATCHED THEN
+    INSERT (SKU, PRODUCT_NAME, CATEGORY, UNIT_PRICE, CURRENCY, IS_ACTIVE)
+    VALUES (SRC.SKU, SRC.PRODUCT_NAME, SRC.CATEGORY, SRC.UNIT_PRICE, SRC.CURRENCY, SRC.IS_ACTIVE);
+
+
+
+-----  Dim Payments
+
+MERGE INTO PROJECT_SEMESTRUCTURED.SILVER.DIM_PAYMENTS AS TGT
+USING (
+    -- Statisc rows by dimension
+    SELECT 'UNKNOWN' AS PAYMENT_ID, 
+           'UNKNOWN' AS ORDER_ID,
+           'UNKNOWN' AS PAYMENT_METHOD,
+            0 AS AMOUNT,
+           'UNKNOWN' AS CURRENCY,
+           'UNKNOWN' AS STATUS
+    UNION ALL
+    -- real payments don't match, I apply a filter to keep only one record considering only the most recent transaction
+    SELECT 
+        'UNKNOWN' AS PAYMENT_ID, 
+        F.ORDER_ID,
+        F.PAYMENT_METHOD,
+        F.PAYMENT_AMOUNT AS AMOUNT,
+        F.CURRENCY,
+        'UNKNOWN' AS STATUS
+    FROM PROJECT_SEMESTRUCTURED.SILVER.SLV_TRANSACTIONS F
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY F.ORDER_ID ORDER BY F.ORDER_DATE DESC) = 1 AND
+    F.ORDER_ID <> 'UNKNOWN'
+) AS SRC
+ON TGT.ORDER_ID = SRC.ORDER_ID
+WHEN NOT MATCHED THEN
+    INSERT (PAYMENT_ID, ORDER_ID, PAYMENT_METHOD, AMOUNT, CURRENCY, STATUS)
+    VALUES (SRC.PAYMENT_ID, SRC.ORDER_ID, SRC.PAYMENT_METHOD, SRC.AMOUNT, SRC.CURRENCY, SRC.STATUS);
+
+-----  DIM ORDER 
+
+MERGE INTO PROJECT_SEMESTRUCTURED.SILVER.DIM_ORDER AS TGT
+USING (
+    -- Statisc rows by dimension
+    SELECT 'UNKNOWN' AS ORDER_ID,
+           'UNKNOWN' AS CUSTOMER_ID,
+            NULL AS ORDER_DATE,
+           'UNKNOWN' AS ORDER_STATUS,
+           'UNKNOWN' AS CHANNEL
+    UNION ALL
+    -- real orders don't match, I apply a filter to keep only one record considering only the most recent transaction
+    SELECT  
+        F.ORDER_ID,
+        F.CUSTOMER_ID,
+        F.ORDER_DATE,
+        'UNKNOWN' AS ORDER_STATUS,
+        'UNKNOWN' AS CHANNEL
+    FROM PROJECT_SEMESTRUCTURED.SILVER.SLV_TRANSACTIONS F
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY F.ORDER_ID ORDER BY F.ORDER_DATE DESC) = 1 AND
+    ORDER_ID <> 'UNKNOWN'
+) AS SRC
+ON TGT.ORDER_ID = SRC.ORDER_ID
+WHEN NOT MATCHED THEN
+    INSERT (ORDER_ID, CUSTOMER_ID, ORDER_DATE, ORDER_STATUS, CHANNEL)
+    VALUES (SRC.ORDER_ID, SRC.CUSTOMER_ID, SRC.ORDER_DATE, SRC.ORDER_STATUS, SRC.CHANNEL);
+
+
+
