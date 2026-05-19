@@ -58,4 +58,28 @@ Transformation Layer
 Gold Layer
    |
    v
-Batch Control / Audit Table
+Batch Control / Audit Table```
+
+snowflake-data-pipeline/
+│
+├── README.md
+│
+├── SQL/
+│   ├── 0.Prep_Env.sql
+│   ├── 0.1.Start_Batch.sql
+│   ├── 1.Load_files_stage.sql
+│   ├── 2.Ingest.sql
+│   ├── 2.1.Update_Batch_Counts.sql
+│   ├── 2.2.Validate_Batch_Load.sql
+│   ├── 3.Transform.sql
+│   ├── 4.Business_Rules.sql
+│   └── 5.Load_Gold.sql
+│
+├── scripts/
+│   └── run_pipeline.ps1
+│
+├── docs/
+│   └── architecture.md
+│
+└── sample_data/
+    └── README.md
