@@ -58,7 +58,7 @@ Transformation Layer
 Gold Layer
    |
    v
-Batch Control / Audit Table```
+Batch Control / Audit Table
 
 snowflake-data-pipeline/
 │
