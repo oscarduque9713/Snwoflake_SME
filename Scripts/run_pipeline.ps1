@@ -1,5 +1,5 @@
 $Connection = "my_conn"
-$BasePath = "C:\Users\GJX\Downloads\Notebooks_snowflake"
+$BasePath = "C:\Users\GJX\Downloads\Notebooks_snowflake\SQL"
 
 function Run-SnowSqlScript {
     param (
