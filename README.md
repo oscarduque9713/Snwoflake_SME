@@ -76,6 +76,7 @@ snowflake-data-pipeline/
 │   ├── 3.Transform.sql
 │   ├── 4.Business_Rules.sql
 │   └── 5.Load_Gold.sql
+│   └── 6.End_Batch_Success.sql
 │
 ├── scripts/
 │   └── run_pipeline.ps1
@@ -114,6 +115,7 @@ File name
 File row number
 Load timestamp
 Batch identifier
+
 5. Batch Metrics Update
 
 Updates the batch control table with row counts and processing metrics.
@@ -124,6 +126,7 @@ Number of CSV rows loaded
 Number of JSON rows loaded
 Number of XML or TXT rows loaded
 Total rows loaded
+
 6. Load Validation
 
 Validates that the current batch loaded data successfully.
@@ -141,3 +144,61 @@ Applies business logic, enrichment rules, mappings, or derived calculations.
 9. Gold Layer Load
 
 Loads the final curated and enriched data into the Gold layer for reporting, analytics, or downstream consumption.
+
+## How to Run the Pipeline
+
+From PowerShell, navigate to the project folder:
+
+```cd path\to\project```
+
+Run the pipeline script:
+
+```powershell -ExecutionPolicy Bypass -File .\scripts\run_pipeline.ps1```
+
+The PowerShell script executes the SQL files in order using SnowSQL.
+
+## SnowSQL Connection
+
+The pipeline uses a named SnowSQL connection.
+
+Example:
+
+```snowsql -c my_connection -f "SQL/0.Prep_Env.sql"```
+
+The connection should be configured locally in the SnowSQL configuration file.
+
+Sensitive credentials should not be committed to GitHub.
+
+
+## Snowflake Git Integration
+
+Snowflake can connect to a Git repository and fetch branches, tags, and commits.
+
+The following commands are neccesary to connect snwoflake with GitHub and bring all branchoes onto snowflake.
+
+```
+CREATE GIT REPOSITORY PROJECT_SEMESTRUCTURED.BRONZE.Snwoflake_SME 
+	ORIGIN = 'https://github.com/oscarduque9713/Snwoflake_SME' 
+	API_INTEGRATION = 'GITHUB_PUBLIC_API_INTEGRATION';
+
+
+SHOW GIT REPOSITORIES;
+
+SHOW GIT BRANCHES IN GIT REPOSITORY Snwoflake_SME;
+
+ALTER GIT REPOSITORY PROJECT_SEMESTRUCTURED.BRONZE.Snwoflake_SME FETCH;
+
+LIST @PROJECT_SEMESTRUCTURED.BRONZE.SNWOFLAKE_SME/branches/Developer/;
+```
+
+Execute a SQL file:
+
+```EXECUTE IMMEDIATE FROM @PROJECT_SEMESTRUCTURED.BRONZE.SNWOFLAKE_SME/branches/Developer/SQL/0.Prep_Env.sql;```
+
+Important note:
+
+Scripts that upload local files using PUT file://... must be executed from the local machine using SnowSQL or Snowflake CLI, because Snowflake cannot access local files directly from a Git repository.
+
+## Author
+
+Oscar Eduardo Duque Ospina
