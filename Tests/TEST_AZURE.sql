@@ -57,3 +57,15 @@ SHOW GIT BRANCHES IN PROJECT_SEMESTRUCTURED.BRONZE.SNWOFLAKE_SME;
 EXECUTE IMMEDIATE FROM @PROJECT_SEMESTRUCTURED.BRONZE.SNWOFLAKE_SME/branches/Developer/SQL/0.Prep_Env.sql;
 
 LIST @PROJECT_SEMESTRUCTURED.BRONZE.SNWOFLAKE_SME/branches/Developer/;
+
+
+download snowsql para microsoft and installing, after in the file config add the connection [connections.my_conn]
+accountname = ZAZQTUJ-YKA21191
+username = oscarduque13
+password = Millonarios16.
+warehousename = COMPUTE_WH
+dbname = PROJECT_SEMESTRUCTURED
+schemaname = BRONZE
+rolename = ACCOUNTADMIN
+
+this is so crucial to create the connection between my local pc with snwoflake
