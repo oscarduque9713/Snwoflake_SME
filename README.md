@@ -1,8 +1,10 @@
-# Snowflake Data Ingestion Pipeline
+# Snowflake Semi-Structured Data Ingestion Pipeline
 
 This project implements a data ingestion pipeline using **Snowflake**, **SnowSQL**, **PowerShell**, and **GitHub**.
 
-The pipeline loads local files into a Snowflake internal stage, ingests raw data into a Bronze layer, applies transformations and business rules, and prepares enriched data for a Gold layer.
+The pipeline loads local files into a Snowflake internal stage, ingests the data into a Bronze layer, applies transformations and business rules, and prepares enriched data for a Gold layer.
+
+The project works with multiple file formats, including **CSV, TXT, XML, and JSON**. All files are initially ingested using a semi-structured/raw approach, preserving the original content and technical metadata before applying transformations.
 
 ---
 
@@ -14,33 +16,59 @@ The pipeline covers:
 
 - Local file ingestion
 - Uploading files to a Snowflake internal stage
+- Processing CSV, TXT, XML, and JSON files
+- Treating all source files as raw or semi-structured input
 - Batch-based processing
-- Raw data storage
+- Raw data storage in the Bronze layer
 - Metadata capture
 - Transformation logic
 - Business rule application
-- Final curated output
+- Final curated output in the Gold layer
 - Git-based version control
 
 ---
 
+## Data Approach
+
+This project uses a raw ingestion strategy for different file types.
+
+The source data includes:
+
+```text
+CSV
+TXT
+XML
+JSON
+```
+
+Even though CSV files are structured by nature, they are initially loaded as raw text lines in the Bronze layer. This allows the pipeline to preserve the original file content and defer parsing rules to later transformation steps.
+
+JSON, XML, and TXT files are also loaded as raw or semi-structured content, allowing flexible processing and schema evolution.
+
+This approach is useful when:
+
+* Source files may have different structures.
+* File schemas may change over time.
+* Raw data needs to be preserved for auditability.
+* Parsing logic should be separated from ingestion logic.
+* Metadata such as file name, row number, and batch ID must be captured.
+
+
 ## Technologies Used
 
-- Snowflake
-- SnowSQL
-- PowerShell
-- SQL
-- Git
-- GitHub
-- Snowflake Internal Stages
-- Snowflake Git Repository
+* Snowflake
+* SnowSQL
+* PowerShell
+* SQL
+* Git
+* GitHub
+* Snowflake Internal Stages
+* Snowflake Git Repository
 
----
 
 ## Architecture
 
-```text
-Local Files
+```Local CSV / TXT / XML / JSON Files
    |
    v
 PowerShell / SnowSQL
@@ -49,10 +77,13 @@ PowerShell / SnowSQL
 Snowflake Internal Stage
    |
    v
-Bronze Layer
+Bronze Raw / Semi-Structured Layer
    |
    v
 Transformation Layer
+   |
+   v
+Business Rules
    |
    v
 Gold Layer
@@ -62,7 +93,7 @@ Batch Control / Audit Table
 ```
 
 ```
-snowflake-data-pipeline/
+snowflake-semi-structured-pipeline/
 │
 ├── README.md
 │
@@ -103,30 +134,35 @@ Each run receives a unique batch identifier that is used to monitor row counts, 
 
 Uploads local files into a Snowflake internal stage.
 
+Supported file types:
+
+CSV
+TXT
+XML
+JSON
+
 Files can be organized by batch, source system, file type, or business domain.
 
 4. Raw Data Ingestion
 
-Loads staged files into raw tables.
+Loads staged files into Bronze tables using a raw/semi-structured strategy.
 
-The ingestion layer stores the original content and technical metadata such as:
+The ingestion process stores:
 
+Raw file content
 File name
 File row number
 Load timestamp
 Batch identifier
-
 5. Batch Metrics Update
 
-Updates the batch control table with row counts and processing metrics.
+Updates the batch control table with row counts by file type:
 
-Typical metrics include:
-
-Number of CSV rows loaded
-Number of JSON rows loaded
-Number of XML or TXT rows loaded
-Total rows loaded
-
+CSV rows
+TXT rows
+XML rows
+JSON rows
+Total rows
 6. Load Validation
 
 Validates that the current batch loaded data successfully.
@@ -135,7 +171,16 @@ If the batch does not contain valid records, the process can be stopped before r
 
 7. Data Transformation
 
-Applies transformation logic to convert raw data into structured and curated datasets.
+Applies parsing and transformation logic to convert raw/semi-structured data into curated datasets.
+
+Examples of transformation logic may include:
+
+Parsing CSV raw lines into columns
+Extracting fields from JSON
+Parsing XML elements
+Standardizing TXT content
+Applying data type conversions
+Creating business-ready attributes
 
 8. Business Rules
 
@@ -166,8 +211,6 @@ Example:
 ```snowsql -c my_connection -f "SQL/0.Prep_Env.sql"```
 
 The connection should be configured locally in the SnowSQL configuration file.
-
-Sensitive credentials should not be committed to GitHub.
 
 
 ## Snowflake Git Integration
