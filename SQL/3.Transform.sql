@@ -1,4 +1,5 @@
-
+USE ROLE DEVELOPER ;
+USE WAREHOUSE PROJECT ;
 
 /* ============================================================
    01 - CSV NORMALIZATION
