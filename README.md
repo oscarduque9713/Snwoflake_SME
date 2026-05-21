@@ -171,16 +171,24 @@ If the batch does not contain valid records, the process can be stopped before r
 
 7. Data Transformation
 
-Applies parsing and transformation logic to convert raw/semi-structured data into curated datasets.
+Applies parsing, cleaning, normalization, and transformation logic to convert raw and semi-structured data into standardized Silver-layer datasets.
 
-Examples of transformation logic may include:
+The transformation process includes rebuilding raw XML and JSON files, cleaning invalid content, parsing semi-structured data, flattening nested elements, applying data type conversions, deduplicating records, and creating a unified transactional model.
 
-Parsing CSV raw lines into columns
-Extracting fields from JSON
-Parsing XML elements
-Standardizing TXT content
-Applying data type conversions
-Creating business-ready attributes
+Examples of transformation logic include:
+
+- Rebuilding XML and JSON files from raw ingested lines.
+- Cleaning invalid headers, comments, separators, and duplicated root elements.
+- Parsing XML content using `PARSE_XML`.
+- Extracting XML nodes and attributes using `XMLGET`.
+- Parsing JSON content using `TRY_PARSE_JSON`.
+- Flattening nested XML and JSON structures using `LATERAL FLATTEN`.
+- Parsing CSV raw lines into structured columns.
+- Standardizing TXT content.
+- Applying trimming, null handling, default values, and safe data type conversions.
+- Deduplicating records using `ROW_NUMBER()` and `QUALIFY`.
+- Standardizing XML and JSON outputs into a unified Silver transaction view.
+- Preparing business-ready data for the Gold layer.
 
 8. Business Rules
 

@@ -1,3 +1,6 @@
+USE ROLE DEVELOPER ;
+USE WAREHOUSE PROJECT ;
+
 ----- CSV 
 PUT 'file://C:/Users/GJX/Downloads/newfiles/*.csv'
 @PROJECT_SEMESTRUCTURED.BRONZE.RAW/

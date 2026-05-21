@@ -1,4 +1,7 @@
 
+USE ROLE DEVELOPER ;
+USE WAREHOUSE PROJECT ;
+
 /*## Referential Consistency Rules
 
 After building the canonical transaction view, I apply MERGE statements to ensure that every foreign key referenced by the transaction fact exists in the corresponding dimension.
