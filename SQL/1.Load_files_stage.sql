@@ -2,27 +2,27 @@ USE ROLE DEVELOPER ;
 USE WAREHOUSE PROJECT ;
 
 ----- CSV 
-PUT 'file://C:/Users/GJX/Downloads/newfiles/*.csv'
-@PROJECT_SEMESTRUCTURED.BRONZE.RAW/
+PUT 'file://&LOCAL_DATA_PATH/*.csv'
+@&DB_NAME.BRONZE.RAW/
 AUTO_COMPRESS=TRUE;
 
-PUT 'file://C:/Users/GJX/Downloads/newfiles/Client B/*.csv'
-@PROJECT_SEMESTRUCTURED.BRONZE.RAW/Client_B/
+PUT 'file://&LOCAL_DATA_PATH//Client B//*.csv'
+@&DB_NAME.BRONZE.RAW/Client_B/
 AUTO_COMPRESS=TRUE;
 
 ------ XML 
-PUT 'file://C:/Users/GJX/Downloads/newfiles/*.xml'
-@PROJECT_SEMESTRUCTURED.BRONZE.RAW/
+PUT 'file://&LOCAL_DATA_PATH/*.xml'
+@&DB_NAME.BRONZE.RAW/
 AUTO_COMPRESS=TRUE;
 
 ------TXT 
-PUT 'file://C:/Users/GJX/Downloads/newfiles/*.txt'
-@PROJECT_SEMESTRUCTURED.BRONZE.RAW/
+PUT 'file://&LOCAL_DATA_PATH/*.txt'
+@&DB_NAME.BRONZE.RAW/
 AUTO_COMPRESS=TRUE;
 
 ----- JSON 
-PUT 'file://C:/Users/GJX/Downloads/newfiles/Client B/*.json'
-@PROJECT_SEMESTRUCTURED.BRONZE.RAW/Cliente_B/
+PUT 'file://&LOCAL_DATA_PATH/Client B/*.json'
+@&DB_NAME.BRONZE.RAW/Client_B/
 AUTO_COMPRESS=TRUE;
 
-LIST @PROJECT_SEMESTRUCTURED.BRONZE.RAW;
+LIST @&DB_NAME.BRONZE.RAW;
